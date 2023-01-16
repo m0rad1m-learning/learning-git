@@ -57,6 +57,10 @@ Alle Branches
 
 `git branch -a`
 
+Anzeigen der upstream branches meiner local branches
+
+`git branch -vv`
+
 ### Branch erstellen / wechseln
 
 Einen neuen local branch erstellen
@@ -72,12 +76,6 @@ Einen neuen local branch erstellen und sofort in diesen wechseln
 Wechseln in einen bestehenden Branch
 
 `git checkout <branch name> ODER <hash of respective commit>` (erste 6 Zeichen ausreichend)
-
-### Tracking von remote branches 
-
-Tracken eines gleichlautenden remote branch
-
-`git branch -vv`
  
 ### Branch umbenennen
 
@@ -305,6 +303,13 @@ Löschen eines remote branches
 Hier nach kann der local branch gelöscht werden
 
 `git branch -d <local branch name>`
+
+## Tracken eines remote repository von einem bestehenden local reporistory
+
+```
+git remote add origin <URL>
+git push -u origin main
+```
 
 ## Pull requests (auch "Merge requests")
 
