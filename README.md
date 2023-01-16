@@ -183,7 +183,7 @@ Informationen zu Dateien in der Staging area
 Rebasing ist eine Alternative zum branch merging, wobei 3-way merges durch fast-forward merges ersetzt werden. Wurde ein feature branch erzeugt und sowohl in diesem, als auch in main branch ein/mehrere commits ausgeführt, kann ein merge nur durch einen 3-way merge erfolgt. Durch rebasing wird der Startpunkt des feature branch auf den letzten commit im main branch verschoben. Somit zweigt der feature branch vom letzten commit im master branch ab und ein einfacher fast-forward merge ist möglich.
 Faktisch wird durch einen rebase die Historie eines repositorys neu geschrieben, da durch den rebase alle vergangenen commits des feature branches neu gesetzt werden, um eine lineare Historie zu erzeugen.
 
-```
+```shell
 git checkout feature-1
 git rebase main
 git checkout main
@@ -194,14 +194,15 @@ git branch -d feature-1
 ### Reset
 
 Mit reset können vergangene commits rückgängig gemacht werden. Hierbei werden drei reset arten unterschieden
+
 - ***soft***: Nur commit werden rückgängig gemacht, in working directory und der staging area bleiben diese aber erhalten.
 - ***mixed*** (default): Änderungen in commits und staging area werden rückgängig gemacht, im working directory bleiben alle Änderungen aber enthalten.
 - ***hard***: Commit und alle Änderungen in staging area und working directory werden rückgängig gemacht --> Mit bedacht zu nutzen
 
-Reset ist immer 'destruktiv', da es die Historie ändert. 
+Reset ist immer 'destruktiv', da es die Historie ändert.
 Reset ermöglich es mehrere commit zurück zu nehmen.
 
-```
+```shell
 git resest <commit hash value to reset to> OR <HEAD~5 to resetz the last 5 commit>
 git reset --<soft|hard> <commit hash value to reset to> OR <HEAD~5 to resetz the last 5 commit>
 ```
@@ -213,12 +214,9 @@ Mit revert kann die letzte vergangene Änderungen rückgängig gemacht werden. A
 Revert ist nicht destruktiv, da die Historie bestehen bleibt.
 Revert ermöglich es immer nur einen commit zurück zu nehmen.
 
-```
-git revert <commit hash value to reset to> OR <HEAD~5 to resetz the last 5 commit>
-```
+`git revert <commit hash value to reset to> OR <HEAD~5 to resetz the last 5 commit>`
 
 ### Amend
-
 
 # GitHub / Bitbucket / GitLab
 
@@ -272,8 +270,10 @@ Daten aus dem remote repository laden
 
 Änderungen aus dem remote repository sollten regelmäßig in das local repository überspielt werden.
 "Git pull" führt implit zwei Schritte aus:
+
 1. ***git fetch***: Übertragen aller Updates / Changes etc. des remote repository in das local repository als objects (blob, tree, commit), jedoch ohne Änderungen am local working directory / staging area
 2. ***git merge*** (Basis: FETCH_HEAD) : 2- oder 3-way merge zwischen local repository und local working area & staging area. Dies betrifft alle tracking branches, beginnend beim aktuell ausgecheckten branch
+
 Vor der Durchführung mittels "git branch -vv" prüfen, ob und welche local branches tracking branches sind
 
 Aktualisierung des tracking status eines local repository branches, z.B. nachdem der zugehörige remote branch gelöscht wurde
