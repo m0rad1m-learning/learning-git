@@ -6,7 +6,7 @@
 - Git file lifecylce: Untracked --> Modified --> Staged --> Unmodified
 
 ## Basisbefehle
- 
+
 Übersicht Git Repository / Status / Datei zum commiten etc.
 
 `git status`
@@ -64,6 +64,7 @@ Anzeigen der upstream branches meiner local branches
 ### Branch erstellen / wechseln
 
 Einen neuen local branch erstellen
+
 - Dies funktioniert auch wenn der Branch nur remote existiert
 - In diesem Fall wird der neu erzeugte local branch automatisch zu einem tracking branch des remote Branches
 
@@ -76,7 +77,7 @@ Einen neuen local branch erstellen und sofort in diesen wechseln
 Wechseln in einen bestehenden Branch
 
 `git checkout <branch name> ODER <hash of respective commit>` (erste 6 Zeichen ausreichend)
- 
+
 ### Branch umbenennen
 
 Den aktuellen local branch umbenennen
@@ -90,6 +91,7 @@ Einen anderen local branch umbennen
 ### Branches mergen (im aufnehmenden Branch, z.B."main")
 
 Von Git verwendente merge Konzepte:
+
 - ***Fast-forward merge***: main / HEAD pointer werden auf letzten commit des feature branch umgeleitet.
 Dies geht nur, wenn nach Erzeugung des feature branch nur in diesem commits durchgeführten wurden und keine weiteren commits im main branch erfolgten
 - ***3-way" merge***: Neuer commit im main branch wird erzeugt, der auf den letzten commit des main branch und den letzten commit des Feature commits zeigt. Der neue commit im main branch hat damit also zwei parrents.
@@ -112,7 +114,8 @@ Löschen eines nicht nicht gemergedten branch (z.B. wenn der Branch nicht mehr g
 ## .gitignore
 
 In der Datei .gitignore können untracked Dateien / Verzeichnise verwaltet werden. Die Datei .gitignore muss dazu selbst commited werden.
-```
+
+```(shell)
 # Ignore file 1
 file-1.txt
 # Igorne all filed in bin folder
@@ -122,11 +125,11 @@ file-1.txt
 ```
 
 Ignorieren und löschen einer bereits commiteten Datei:
+
 1. Datei in .gitignore aufnehmen
 2. `git rm --cached <file>`
 3. `git commit -m "File ignored`
 4. `git push`
-
 
 ## Git Config
 
@@ -138,7 +141,7 @@ Globale config auslesen
 
 Gobalen user name und eail setzen
 
-```
+```(shell)
 git config --global user.name "<Name>"
 git config --global user.email <E-Mail>
 ```
@@ -147,17 +150,17 @@ Den default name eine neuen Reporistories ändern
 
 `git config --global init.defaultBranch >main>`
 
-
 ### Lokale / User config
+
 Lokale Einstellungen überschreiben immer die globalen Einstellungen in einem local reporistory
- 
+
 Lokale Config auslegen
 
  `cat .git/config`
 
 Lokalen user namen und eMail setzen
- 
-```
+
+```(shell)
 git config user.name "<Name>"
 git config user.email <E-Mail>
 ```
@@ -165,7 +168,8 @@ git config user.email <E-Mail>
 ## Git under the hood
 
 Informationen zu Git objects
-```
+
+```(shell)
 git cat-file -p <hash> // Content
 git cat-file -t <hash> // Type
 git cat-file -s <hash> // Size
@@ -220,7 +224,7 @@ Revert ermöglich es immer nur einen commit zurück zu nehmen.
 
 Nach Erstellung eines Git Hub Repositories
 
-## Verknüpfen eines local mit einem remote repositories 
+## Verknüpfen eines local mit einem remote repositories
 
 Verknüpfen des local mit dem remote repository
 
@@ -306,7 +310,7 @@ Hier nach kann der local branch gelöscht werden
 
 ## Tracken eines remote repository von einem bestehenden local reporistory
 
-```
+```(shell)
 git remote add origin <URL>
 git push -u origin main
 ```
