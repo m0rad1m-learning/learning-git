@@ -211,7 +211,7 @@ Es gibt drei verschiedene Git Config Ebenen:
 
 - *System* (optional): `git` Einstellungen für alle User des Systems (Pfad: `$/etc/gitconfig`)
 - *Global*: `git` Einstellungen für alle repositiries des Users (Pfad: `$USER_HOME/.gitconfig`)
-- *Local*: `git` Einstellungen für ein dediziertes repositiries eines Users (Pfad: `<repo-home>/.gitconfig`) 
+- *Local*: `git` Einstellungen für ein dediziertes repositiries eines Users (Pfad: `<repo-home>/.gitconfig`)
 
 ### Globale config
 
@@ -416,3 +416,29 @@ git push -u origin main
 ## Pull requests (auch "Merge requests")
 
 Mit pull requestes (PR) bittet man andere Entwickler um ein Review der eigenen Änderungen im local repository branch, bevor diese in den remote repository branch eingespielt werden.
+
+## Git Tags
+
+Git Tags sind Referenzen, die auf bestimmte Zeitpunkte im Git-Verlauf verweisen (Commits). In der Regel werden mit Tags bestimmte Punkte im Verlauf erfasst, die für einen markierten Versions-Release (z. B. v1.0.1) verwendet werden.
+
+Es wird zwischen Lightweight und Annotated-Tags unterschieden. Annotated-Tags werden von Git wie Commits behandelt und sind daher zu bevorzugen.
+
+Übersicht aller aktuell vorhandenen Tags
+
+`git tag`
+
+### Annotated git tag erstellen
+
+Erstellen eines `git tags` der auf den letzten Commit verweist
+
+`git tag -s -a <tag-version> -m "<message>"`
+
+Erstellen eines `git tags` der nachträglich auf einen bestimmten Commit verweist
+
+`git tag -s -a <tag-version> -m "<message>" <commit-id (first 6 chars)>`
+
+### Pushing von Git Tags
+
+Git Tags müssen explizit in das remote repositiry gepusht werden, da sie nicht implizit durch `git push` übertragen werden.
+
+`git push <remote repository name, z.B. origin> <tag-version>`
