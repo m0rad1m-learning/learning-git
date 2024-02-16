@@ -2,7 +2,7 @@
 
 ## Basiskonzepte
 
-- Working directory --> Staging area --> Git Repository
+- Working directory --> Staging area --> (Local) Git Repository
 - Git file lifecylce: Untracked --> Modified --> Staged --> Unmodified
 
 ## Basisbefehle
@@ -11,25 +11,40 @@
 
 `git status`
 
-Übertragung von Änderungen aus dem Working Directory in die Staging Area
+Übertragung bestimmter Änderungen aus dem Working Directory in die Staging Area
 
 `git add <filename>`
 
-Alle Dateien auf einmal hinzufügen
+Übertragung aller Änderungen aus dem Working Directory in die Staging Area
 
 `git add .`
 
-Löschen von Datein aus der Staging Area
+Löschen bestimmter Änderungen aus der Staging Area
 
 `git rm --cached <filename>`
 
-Übertragung von Änderungen aus der Staging Area in das Git Repository
+Übertragung von Änderungen aus der Staging Area in das Local Repository
 
 `git commit -m  "<Nachricht>"`
 
 Stage & Commit in einem Befehl
 
-`git commit -a -m "<Nachricht>"`
+`git commit -am "<Nachricht>"`
+
+Ändern der letzten Commit Nachricht (der letzte Commit wird durch einen neuen Commit ersetzt)
+
+`git commit --ammend -m "<Nachricht>"`
+
+Ändern des letzten Commit
+
+```shell
+git add Datei1.txt
+git commit -m "Änderungen an Datei1.txt & Datei2.txt"
+# Das Hinzufügen der Datei2.txt zur Staging Area wurde vergessen, damit ist die Datei auch nicht im Local Repository
+git add Datei2.txt
+git commit --amend --no-edit
+# In der Staging Area  liegt nun die Datei2.txt. Der 'amend' Befehlt überführt diese in das Local Repository, so dass der Commit Datei1.txt & Datei2.txt umfasst, also geändert wurde. Die Commit Nachricht selbst wurde nicht geändert.
+```
 
 ### Übersicht aller (commit) Änderungen
 
@@ -37,7 +52,15 @@ Textbasierte Übersicht
 
 `git log`
 
-Übersicht mit grafischer Ansicht (Verlinkung der jeweiligen parrent trees
+Textbasierte Übersicht des letzten Commit in einer Zeile
+
+`git log --oneline`
+
+Textbasierte Übersicht aller vergangenen Commit in einer Zeile
+
+`git log --pretty=oneline`
+
+Übersicht mit grafischer Ansicht (Verlinkung der jeweiligen parrent trees)
 
 `git log --graph`
 
@@ -45,19 +68,19 @@ Textbasierte Übersicht
 
 ### Übersicht aller Branches
 
-Nur lokale Branches
+Nur lokale branches
 
 `git branch`
 
-Nur remote Branches
+Nur remote branches
 
 `git branch -r`
 
-Alle Branches
+Alle branches
 
 `git branch -a`
 
-Anzeigen der upstream branches meiner local branches
+Anzeigen der upstream / remote (tracking) branches meiner local branches
 
 `git branch -vv`
 
@@ -65,8 +88,7 @@ Anzeigen der upstream branches meiner local branches
 
 Einen neuen local branch erstellen
 
-- Dies funktioniert auch wenn der Branch nur remote existiert
-- In diesem Fall wird der neu erzeugte local branch automatisch zu einem tracking branch des remote Branches
+> Dies funktioniert auch wenn der branch nur remote existiert. In diesem Fall wird der neu erzeugte local branch automatisch zu einem tracking branch des remote branches
 
 `git branch <branch name>`
 
@@ -74,9 +96,9 @@ Einen neuen local branch erstellen und sofort in diesen wechseln
 
 `git checkout -b <branch name>`
 
-Wechseln in einen bestehenden Branch
+Wechseln in einen bestehenden branch
 
-`git checkout <branch name> ODER <hash of respective commit>` (erste 6 Zeichen ausreichend)
+`git checkout <branch name> ODER <hash of respective commit>` (erste 6 Zeichen des Hash Commits ausreichend)
 
 ### Branch umbenennen
 
@@ -103,13 +125,65 @@ Mergen des aktuellen branch mit einem feature branch
 
 ### Branches löschen (z.B. nach einem Merge)
 
-Löchen eines (bereits gemergten) branches
+Löschen eines (bereits gemergten) local branches
 
 `git branch -d <name>`
 
-Löschen eines nicht nicht gemergedten branch (z.B. wenn der Branch nicht mehr gebraucht wird)
+Löschen eines (bereits gemergten) remote branches
+
+`git push origin --delete <name>`
+
+Löschen eines nicht nicht gemergeten branch (z.B. wenn der branch nicht mehr gebraucht wird)
 
 `git branch -D <name>`
+
+## Änderungen rückgängig machen
+
+### Clean
+
+Löschen von Dateien die nur im Working Directory liegen und bisher nicht getrackt werden
+
+```shell
+# Dry-run
+git clean -n
+# Löschen nicht getrackter Dateien
+git clean -f
+# Löschen nicht getrackter Dateien & Verzeichnisse
+git clean -df
+```
+
+### Revert
+
+Rückgängig machen eines einzelnen Commits.
+Hierbei wird ein neuer Commits erzeugt, die Historie bleibt somit in Takt.
+
+`git revert <HEAD OR Commit ID (first 6 chars)>`
+
+### Reset
+
+Dies entspricht einem "Zurück in die Vergangenheit". Alle Commits die vor dem genannten Rücksprung-Commit liegen, exisieren danach nicht mehr.
+
+Folgende Varianten werden unterschieden:
+
+- *HARD*: Alle Änderungen im Working Direcoty, der Staging Area und ggf. der Commit History werden zurück gesetzt
+  
+  ```shell
+  # Reset auf den HEAD löscht nur alle Änderungen im Working Directory und der Staging Area
+  git reset --hard  # HEAD wird implizit angenommen, alternativ z.B. "origin/main"
+  # Reset auf eien spezifischen Commit in der Vergangenheit, alle Änderungen danach sind verlorten
+  git reset --hard "<commit ID (first 6 chars)>"
+  ```
+
+- *MIXED*: Alle Änderungen in der Staging Area und der Commit History werden zurück gesetzt, Änderungen im Working Directory bleiben erhalten --> Dies ist das "default" Verhalten bei Verwendung von `git reset`
+
+  ```shell
+  # Default
+  git reset # HEAD wird implizit angenommen
+  # Reset auf eien spezifischen Commit in der Vergangenheit, alle Änderungen danach sind verlorten
+  git reset --mixed "<commit ID (first 6 chars)>"
+  ```
+
+- *SOFT*: <tbd>
 
 ## .gitignore
 
@@ -132,6 +206,12 @@ Ignorieren und löschen einer bereits commiteten Datei:
 4. `git push`
 
 ## Git Config
+
+Es gibt drei verschiedene Git Config Ebenen:
+
+- *System* (optional): `git` Einstellungen für alle User des Systems (Pfad: `$/etc/gitconfig`)
+- *Global*: `git` Einstellungen für alle repositiries des Users (Pfad: `$USER_HOME/.gitconfig`)
+- *Local*: `git` Einstellungen für ein dediziertes repositiries eines Users (Pfad: `<repo-home>/.gitconfig`) 
 
 ### Globale config
 
@@ -156,13 +236,28 @@ Lokale Einstellungen überschreiben immer die globalen Einstellungen in einem lo
 
 Lokale Config auslegen
 
- `cat .git/config`
+`cat .git/config`
 
 Lokalen user namen und eMail setzen
 
 ```(shell)
 git config user.name "<Name>"
 git config user.email <E-Mail>
+```
+
+### Beispiel einer .gitconfig
+
+```text
+[user]
+    name=<YOUR-USER-NAME>
+    email=<YOUR-USER-EMAIL>
+    signingkey=~/.ssh/id_ed25519
+[init] 
+    defaultbranch=main
+[gpg]
+    format=ssh                               
+[commit]
+    gpgsign=true
 ```
 
 ## Git under the hood
@@ -220,7 +315,9 @@ Revert ermöglich es immer nur einen commit zurück zu nehmen.
 
 ### Amend
 
-# GitHub / Bitbucket / GitLab
+<tbd>
+
+## GitHub / Bitbucket / GitLab
 
 Nach Erstellung eines Git Hub Repositories
 
@@ -249,16 +346,7 @@ Per Default wird nur der default branch des remote repository zu einem tracking 
 
 ## Aktualisieren des local repository mit Änderungen im remote repository
 
-Laden aller branches und/or tags aus dem remote repository in das local repository
-Dies hat keine Auswirkung auf working directory / staging area im local repository: Es erfolgt kein sync von Versionen / keine Erzeugung eines local (tracking) branches
-
-`git fetch`
-
-Nach dem fetch Befehl kann der remote branch ausgecheckt und alle Daten übertragen werden
-
-`git checkout <remote branch name>`
-
-Anzeige aller branches und deren letzten commit
+Anzeige aller branches und deren letzten commit IDs
 
 `git show-ref`
 
@@ -266,17 +354,27 @@ Vergleich der commits zweier branches zwischen local und remote repositories
 
 `git show-ref <branch name>`
 
+Laden aller branches und/or tags aus dem remote repository in das local repository
+Dies hat keine Auswirkung auf Working Directory / die Staging Area. Es erfolgt kein sync von Versionen / keine Erzeugung eines local (tracking) branches
+
+`git fetch`
+
+Nach dem fetch Befehl kann der remote branch ausgecheckt und alle Daten übertragen werden
+
+`git checkout <remote branch name>`
+
 Daten aus dem remote repository laden
 
 `git pull`
 
-Änderungen aus dem remote repository sollten regelmäßig in das local repository überspielt werden.
-"Git pull" führt implit zwei Schritte aus:
+    > Änderungen aus dem remote repository sollten regelmäßig in das local repository überspielt werden.
+    
+    Git pull" führt implit zwei Schritte aus:
 
-1. ***git fetch***: Übertragen aller Updates / Changes etc. des remote repository in das local repository als objects (blob, tree, commit), jedoch ohne Änderungen am local working directory / staging area
-2. ***git merge*** (Basis: FETCH_HEAD) : 2- oder 3-way merge zwischen local repository und local working area & staging area. Dies betrifft alle tracking branches, beginnend beim aktuell ausgecheckten branch
+    1. *git fetch*: Übertragen aller Updates / Changes etc. des remote repository in das local repository als objects (blob, tree, commit), jedoch ohne Änderungen am local working directory / staging area
+    2. *git merge* (Basis: FETCH_HEAD) : 2- oder 3-way merge zwischen local repository und local working area & staging area. Dies betrifft alle tracking branches, beginnend beim aktuell ausgecheckten branch
 
-Vor der Durchführung mittels "git branch -vv" prüfen, ob und welche local branches tracking branches sind
+Vor der Durchführung mittels `git branch -vv` prüfen, ob und welche local branches tracking branches sind
 
 Aktualisierung des tracking status eines local repository branches, z.B. nachdem der zugehörige remote branch gelöscht wurde
 
@@ -286,7 +384,7 @@ Der local branch kann hiernach gelöscht werden
 
 `git branch -D <local branch name>`
 
-Löschen eines local repository branches, den es im remote repository nicht mehr gibt
+Löschen der Referenzen auf remote repository branches, den es im remote repository nicht mehr gibt
 
 `git remote prune <remote repository name, z.B. origin>`
 
