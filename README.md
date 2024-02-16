@@ -1,11 +1,32 @@
 # Git
 
+## Inhaltsverzeichnis
+
+1. [Basiskonzepte](#basiskonzepte)
+2. [Basisbefehle](#basisbefehle)
+3. [Branches](#branches)
+4. [Änderungen Zwischenspeichern](#änderungen-zwischenspeichern)
+5. [Änderungen rückgängig machen](#änderungen-rückgängig-machen)
+6. [Inhalte löschen](#inhalte-löschen)
+7. [Git under the hood](#git-under-the-hood)
+8. [Git Ingore](#git-ignore)
+9. [Git Config](#git-config)
+10. [GitHub](#github)
+11. [Pull requests](#pull-requests)
+12. [Git Tags](#git-tags)
+13. [ToDos](#todos)
+14. [Backup](#backup)
+
 ## Basiskonzepte
+
+[ToC](#inhaltsverzeichnis)
 
 - Working Tree --> Staging area --> (Local) Git Repository
 - Git file lifecylce: Untracked --> Modified --> Staged --> Unmodified
 
 ## Basisbefehle
+
+[ToC](#inhaltsverzeichnis)
 
 Übersicht Git Repository / Status / Datei zum commiten etc.
 
@@ -65,6 +86,8 @@ Textbasierte Übersicht aller vergangenen Commit in einer Zeile
 `git log --graph`
 
 ## Branches
+
+[ToC](#inhaltsverzeichnis)
 
 ### Übersicht aller Branches
 
@@ -185,6 +208,8 @@ Löschen eines nicht nicht gemergeten branch (z.B. wenn der branch nicht mehr ge
 
 ## Änderungen Zwischenspeichern
 
+[ToC](#inhaltsverzeichnis)
+
 In manchen Situation kann es hilfreich sein durchgeführte Änderungen in einem branch zwischenzuspeichern, ohne diese direkt zu commiten. Hierzu dient `git stash`
 
 ### Stash
@@ -228,6 +253,8 @@ git stash clear
 ```
 
 ## Änderungen rückgängig machen
+
+[ToC](#inhaltsverzeichnis)
 
 ### Clean
 
@@ -290,6 +317,8 @@ Die Verwendung von `revert` ist sinnvoll, wenn Änderungen bereits in ein remote
 
 ## Inhalte löschen
 
+[ToC](#inhaltsverzeichnis)
+
 Löschen getrackter Inhalte im Working Tree und der Staging Area
 
 ```shell
@@ -306,6 +335,8 @@ Löschen getrackter Inhalte nur der Staging Area, ohne Auswirkungen auf das Work
 
 ## Git under the hood
 
+[ToC](#inhaltsverzeichnis)
+
 Informationen zu Git objects
 
 ```shell
@@ -319,6 +350,8 @@ Informationen zu Dateien in der Staging area
 
 ## Git Ignore
 
+[ToC](#inhaltsverzeichnis)
+
 In der Datei `.gitignore` können untracked Dateien / Verzeichnise verwaltet werden. Die Datei .gitignore muss dazu selbst commited werden.
 
 ```(shell)
@@ -331,6 +364,8 @@ file-1.txt
 ```
 
 ## Git Config
+
+[ToC](#inhaltsverzeichnis)
 
 Es gibt drei verschiedene Git Config Ebenen:
 
@@ -385,11 +420,13 @@ git config user.email <E-Mail>
     gpgsign=true
 ```
 
-## GitHub / Bitbucket / GitLab
+## GitHub
+
+[ToC](#inhaltsverzeichnis)
 
 Nach Erstellung eines Git Hub Repositories
 
-## Verknüpfen eines local mit einem remote repositories
+### Verknüpfen eines local mit einem remote repositories
 
 Verknüpfen des local mit dem remote repository
 
@@ -412,7 +449,7 @@ Per Default wird nur der default branch des remote repository zu einem tracking 
 
 `git clone <url>`
 
-## Aktualisieren des local repository mit Änderungen im remote repository
+### Aktualisieren des local repository mit Änderungen im remote repository
 
 Anzeige aller branches und deren letzten commit IDs
 
@@ -456,7 +493,7 @@ Löschen der Referenzen auf remote repository branches, den es im remote reposit
 
 `git remote prune <remote repository name, z.B. origin>`
 
-## Hochladen von Änderungen im local repository an das remote repository
+### Hochladen von Änderungen im local repository an das remote repository
 
 Übertragung aller Änderungen des aktuellen local repositroy branches in den bestehenden remote repository branch
 
@@ -474,18 +511,23 @@ Hier nach kann der local branch gelöscht werden
 
 `git branch -d <local branch name>`
 
-## Tracken eines remote repository von einem bestehenden local reporistory
+### Tracken eines remote repository von einem bestehenden local reporistory
 
 ```(shell)
 git remote add origin <URL>
 git push -u origin main
 ```
 
-## Pull requests (auch "Merge requests")
+## Pull requests
 
-Mit pull requestes (PR) bittet man andere Entwickler um ein Review der eigenen Änderungen im local repository branch, bevor diese in den remote repository branch eingespielt werden.
+[ToC](#inhaltsverzeichnis)
+
+
+Mit pull requestes (PR), auch "Merge requests", bittet man andere Entwickler um ein Review der eigenen Änderungen im local repository branch, bevor diese in den remote repository branch eingespielt werden.
 
 ## Git Tags
+
+[ToC](#inhaltsverzeichnis)
 
 Git Tags sind Referenzen, die auf bestimmte Zeitpunkte im Git-Verlauf verweisen (Commits). In der Regel werden mit Tags bestimmte Punkte im Verlauf erfasst, die für einen markierten Versions-Release (z. B. v1.0.1) verwendet werden.
 
@@ -513,9 +555,13 @@ Git Tags müssen explizit in das remote repositiry gepusht werden, da sie nicht 
 
 ## ToDos
 
+[ToC](#inhaltsverzeichnis)
+
 ### Amend
 
 ## Backup
+
+[ToC](#inhaltsverzeichnis)
 
  ```text
               (FB1)-->(FB2)-->(FB3)
