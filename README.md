@@ -2,7 +2,7 @@
 
 ## Basiskonzepte
 
-- Working directory --> Staging area --> (Local) Git Repository
+- Working Tree --> Staging area --> (Local) Git Repository
 - Git file lifecylce: Untracked --> Modified --> Staged --> Unmodified
 
 ## Basisbefehle
@@ -11,11 +11,11 @@
 
 `git status`
 
-Übertragung bestimmter Änderungen aus dem Working Directory in die Staging Area
+Übertragung bestimmter Änderungen aus dem Working Tree in die Staging Area
 
 `git add <filename>`
 
-Übertragung aller Änderungen aus dem Working Directory in die Staging Area
+Übertragung aller Änderungen aus dem Working Tree in die Staging Area
 
 `git add .`
 
@@ -98,7 +98,22 @@ Einen neuen local branch erstellen und sofort in diesen wechseln
 
 Wechseln in einen bestehenden branch
 
-`git checkout <branch name> ODER <hash of respective commit>` (erste 6 Zeichen des Hash Commits ausreichend)
+`git checkout <branch name | hash commit (frist 6 chars)>`
+
+```text
+   Example: Checkout of a dedicated hash commit in 'main' branch
+   ========
+   # Initial state
+   (C1)--> (C2)-->(C3)-->(C4)-->(C5) <-- [HEAD, main]
+    
+   # Checkout hash commit
+   git checkout c2
+
+   # Final state (detachted HEAD state)
+   (C1)--> (C2)-->(C3)-->(C4)-->(C5) <-- [main]
+            |
+          [HEAD]
+```
 
 ### Branch umbenennen
 
@@ -123,6 +138,37 @@ Mergen des aktuellen branch mit einem feature branch
 
 `git merge <feature branch name>`
 
+### Rebasing
+
+Rebasing ist eine Alternative zum branch merging, wobei 3-way merges durch fast-forward merges ersetzt werden. Wurde ein feature branch erzeugt und sowohl in diesem, als auch in main branch ein/mehrere commits ausgeführt, kann ein merge nur durch einen 3-way merge erfolgt. Durch rebasing wird der Startpunkt des feature branch auf den letzten commit im main branch verschoben. Somit zweigt der feature branch vom letzten commit im master branch ab und ein einfacher fast-forward merge ist möglich.
+Faktisch wird durch einen rebase die Historie eines repositorys neu geschrieben, da durch den rebase alle vergangenen commits des feature branches neu gesetzt werden, um eine lineare Historie zu erzeugen.
+
+```shell
+git checkout feature-1
+git rebase main
+git checkout main
+git merge feature-1
+git branch -d feature-1
+```
+
+```text
+   Example: Rebasing a feature branch
+   ========
+   # Initial state
+            (FB1)-->(FB2)-->(FB3) <-- [HEAD, feature-1]
+             /
+   (C1)--> (C2)-->(C3)-->(C4)-->(C5) <-- [main]
+    
+   # Execute command from above
+   git checkout feature-1
+   git rebase main
+
+   # State
+                                 (FB1)-->(FB2)-->(FB3) <-- [HEAD, feature-1]
+                                  /
+   (C1)--> (C2)-->(C3)-->(C4)-->(C5) <-- [main]
+   ```
+
 ### Branches löschen (z.B. nach einem Merge)
 
 Löschen eines (bereits gemergten) local branches
@@ -137,11 +183,55 @@ Löschen eines nicht nicht gemergeten branch (z.B. wenn der branch nicht mehr ge
 
 `git branch -D <name>`
 
+## Änderungen Zwischenspeichern
+
+In manchen Situation kann es hilfreich sein durchgeführte Änderungen in einem branch zwischenzuspeichern, ohne diese direkt zu commiten. Hierzu dient `git stash`
+
+### Stash
+
+Speichern von Änderungen im Working Tree und der Staging Area.
+
+> Es sind mehrere Zwischenspeicher möglich. Jeder Zwischenspeicher hat eine eindeutige ID: `stash@{#}`. Wird bei Verwendung von `git stash` keine eindeutige ID angegeben, wird implizit immer `stash@{0}` angenommen
+
+`git stash`
+
+Aufruf von Änderungen aus dem Zwischenspeicher
+
+`git stash pop` // Änderungen werden aus dem Zwischenspeicher gelöscht
+
+`git stash apply` // Änderungen bleiben im Zwischenspeicher erhalten
+
+Zwischenspeichern von untracked / ignored Dateien
+
+`git stash -u` // für untracked Dateien
+
+`git stash -a` // für untracke und ignorierte Dateien
+
+Anzeigen aller Zwischenspeicher
+
+`git stash list`
+
+Anzeigen der Inhalte eines Zwischenspeichers
+
+```shell
+git stash show
+# For more details
+git stash show -p
+```
+
+Zwischenspeicher löschen
+
+```shell
+`git stash drop <stash id>`
+# All stahses
+git stash clear
+```
+
 ## Änderungen rückgängig machen
 
 ### Clean
 
-Löschen von Dateien die nur im Working Directory liegen und bisher nicht getrackt werden
+Löschen von Dateien die nur im Working Tree liegen und bisher nicht getrackt werden
 
 ```shell
 # Dry-run
@@ -152,29 +242,26 @@ git clean -f
 git clean -df
 ```
 
-### Revert
-
-Rückgängig machen eines einzelnen Commits.
-Hierbei wird ein neuer Commits erzeugt, die Historie bleibt somit in Takt.
-
-`git revert <HEAD OR Commit ID (first 6 chars)>`
-
 ### Reset
 
-Dies entspricht einem "Zurück in die Vergangenheit". Alle Commits die vor dem genannten Rücksprung-Commit liegen, exisieren danach nicht mehr.
+Dies entspricht einem "Zurück in die Vergangenheit". Alle Commits die vor dem genannten Rücksprung-Commit liegen, exisieren danach nicht mehr. MIt `git reset` können ein oder mehrer Commits zurück genommen werden
+
+> Reset ist immer 'destruktiv', da es die Historie ändert. Insbesondere die  Verwendung von *hard* sollte mit Bedacht gewählt werden.
 
 Folgende Varianten werden unterschieden:
 
-- *HARD*: Alle Änderungen im Working Direcoty, der Staging Area und ggf. der Commit History werden zurück gesetzt
+- *hard*: Alle Änderungen im Working Direcoty, der Staging Area und ggf. der Commit History werden zurück gesetzt
   
   ```shell
-  # Reset auf den HEAD löscht nur alle Änderungen im Working Directory und der Staging Area
+  # Reset auf den HEAD löscht nur alle Änderungen im Working Tree und der Staging Area
   git reset --hard  # HEAD wird implizit angenommen, alternativ z.B. "origin/main"
   # Reset auf eien spezifischen Commit in der Vergangenheit, alle Änderungen danach sind verlorten
   git reset --hard "<commit ID (first 6 chars)>"
   ```
 
-- *MIXED*: Alle Änderungen in der Staging Area und der Commit History werden zurück gesetzt, Änderungen im Working Directory bleiben erhalten --> Dies ist das "default" Verhalten bei Verwendung von `git reset`
+- *mixed*: Alle Änderungen in der Staging Area und im Local Repository werden zurück gesetzt, Änderungen im Working Tree bleiben erhalten
+
+  --> Dies ist das "default" Verhalten bei Verwendung von `git reset`
 
   ```shell
   # Default
@@ -183,11 +270,56 @@ Folgende Varianten werden unterschieden:
   git reset --mixed "<commit ID (first 6 chars)>"
   ```
 
-- *SOFT*: <tbd>
+- *soft*: Alle Änderungen im Local Repository werden zurück gesetzt, Änderungen im Working Tree und der Staging Area bleiben erhalten
 
-## .gitignore
+  ```shell
+  # Default
+  git reset --soft <HEAD (implizit) | <commit hash (first 6 chars) | HEAD~5 to reset last 5 commits>
+  # Reset auf eien spezifischen Commit in der Vergangenheit, alle Änderungen danach sind verlorten
+  ```
 
-In der Datei .gitignore können untracked Dateien / Verzeichnise verwaltet werden. Die Datei .gitignore muss dazu selbst commited werden.
+### Revert
+
+Mit `revert` kann die letzte vergangene Änderungen rückgängig gemacht werden. Anders als bei `reset` wird bei `revert` jedoch nicht "die Zeit zurück gedreht", sondern es wird ein neues commit erzeugt, welche die letzten Änderungen Rückgängig macht. Die Historie bleibt bei `revert` also erhalten und wird nicht gelöscht.
+
+Die Verwendung von `revert` ist sinnvoll, wenn Änderungen bereits in ein remote repository eingeflossen sind und andere Entwickler ggf. bereits ein pull auf diese remote repository ausgeführt haben.
+
+> Revert ist nicht destruktiv, da die Historie bestehen bleibt und ermöglich es immer nur einen Commit zurück zu nehmen.
+
+`git revert <HEAD OR commit hash (first 6 chars)>`
+
+## Inhalte löschen
+
+Löschen getrackter Inhalte im Working Tree und der Staging Area
+
+```shell
+git rm <name>
+git rm -n <name>  # dry-run
+git rm -r <folder>  # recursive delete
+```
+
+> Die Löschung im local repository wird erst wirksam, wenn diese mit `git commit` bestätigt wurde. Vorher kann eine Löschung durch `git checkout .` oder `git reset HEAD` rückgängig gemacht werden.
+
+Löschen getrackter Inhalte nur der Staging Area, ohne Auswirkungen auf das Working Tree
+
+`git rm --cached <name>`
+
+## Git under the hood
+
+Informationen zu Git objects
+
+```shell
+git cat-file -p <commit hash (first 6 chars)>  # Content of the object
+git cat-file -t <commit hash (first 6 chars)>  # Type of the object
+git cat-file -s <commit hash (first 6 chars)>  # Size of the object
+```
+
+Informationen zu Dateien in der Staging area
+`git ls-files -s`
+
+## Git Ignore
+
+In der Datei `.gitignore` können untracked Dateien / Verzeichnise verwaltet werden. Die Datei .gitignore muss dazu selbst commited werden.
 
 ```(shell)
 # Ignore file 1
@@ -197,13 +329,6 @@ file-1.txt
 # Ignore all temp files
 *.tmp
 ```
-
-Ignorieren und löschen einer bereits commiteten Datei:
-
-1. Datei in .gitignore aufnehmen
-2. `git rm --cached <file>`
-3. `git commit -m "File ignored`
-4. `git push`
 
 ## Git Config
 
@@ -260,63 +385,6 @@ git config user.email <E-Mail>
     gpgsign=true
 ```
 
-## Git under the hood
-
-Informationen zu Git objects
-
-```(shell)
-git cat-file -p <hash> // Content
-git cat-file -t <hash> // Type
-git cat-file -s <hash> // Size
-```
-
-Informationen zu Dateien in der Staging area
-`git ls-files -s`
-
-## Fortgeschrittenes Git
-
-### Rebasing
-
-Rebasing ist eine Alternative zum branch merging, wobei 3-way merges durch fast-forward merges ersetzt werden. Wurde ein feature branch erzeugt und sowohl in diesem, als auch in main branch ein/mehrere commits ausgeführt, kann ein merge nur durch einen 3-way merge erfolgt. Durch rebasing wird der Startpunkt des feature branch auf den letzten commit im main branch verschoben. Somit zweigt der feature branch vom letzten commit im master branch ab und ein einfacher fast-forward merge ist möglich.
-Faktisch wird durch einen rebase die Historie eines repositorys neu geschrieben, da durch den rebase alle vergangenen commits des feature branches neu gesetzt werden, um eine lineare Historie zu erzeugen.
-
-```shell
-git checkout feature-1
-git rebase main
-git checkout main
-git merge feature-1
-git branch -d feature-1
-```
-
-### Reset
-
-Mit reset können vergangene commits rückgängig gemacht werden. Hierbei werden drei reset arten unterschieden
-
-- ***soft***: Nur commit werden rückgängig gemacht, in working directory und der staging area bleiben diese aber erhalten.
-- ***mixed*** (default): Änderungen in commits und staging area werden rückgängig gemacht, im working directory bleiben alle Änderungen aber enthalten.
-- ***hard***: Commit und alle Änderungen in staging area und working directory werden rückgängig gemacht --> Mit bedacht zu nutzen
-
-Reset ist immer 'destruktiv', da es die Historie ändert.
-Reset ermöglich es mehrere commit zurück zu nehmen.
-
-```shell
-git resest <commit hash value to reset to> OR <HEAD~5 to resetz the last 5 commit>
-git reset --<soft|hard> <commit hash value to reset to> OR <HEAD~5 to resetz the last 5 commit>
-```
-
-### Revert
-
-Mit revert kann die letzte vergangene Änderungen rückgängig gemacht werden. Anders als bei reset wird bei revert jedoch nicht "die Zeit zurück gedreht", sondern es wird ein neues commit erzeugt, welche die letzten Änderungen Rückgängig macht. Die Historie bleibt bei revert also erhalten und wird nicht gelöscht. Die Verwendung von revert ist sinnvoll, wenn Änderungen bereits in ein remote repository eingeflossen sind und andere Entwickler ggf. bereits ein pull auf diese remote repository ausgeführt haben.
-
-Revert ist nicht destruktiv, da die Historie bestehen bleibt.
-Revert ermöglich es immer nur einen commit zurück zu nehmen.
-
-`git revert <commit hash value to reset to> OR <HEAD~5 to resetz the last 5 commit>`
-
-### Amend
-
-<tbd>
-
 ## GitHub / Bitbucket / GitLab
 
 Nach Erstellung eines Git Hub Repositories
@@ -355,7 +423,7 @@ Vergleich der commits zweier branches zwischen local und remote repositories
 `git show-ref <branch name>`
 
 Laden aller branches und/or tags aus dem remote repository in das local repository
-Dies hat keine Auswirkung auf Working Directory / die Staging Area. Es erfolgt kein sync von Versionen / keine Erzeugung eines local (tracking) branches
+Dies hat keine Auswirkung auf Working Tree / die Staging Area. Es erfolgt kein sync von Versionen / keine Erzeugung eines local (tracking) branches
 
 `git fetch`
 
@@ -442,3 +510,16 @@ Erstellen eines `git tags` der nachträglich auf einen bestimmten Commit verweis
 Git Tags müssen explizit in das remote repositiry gepusht werden, da sie nicht implizit durch `git push` übertragen werden.
 
 `git push <remote repository name, z.B. origin> <tag-version>`
+
+## ToDos
+
+### Amend
+
+## Backup
+
+ ```text
+              (FB1)-->(FB2)-->(FB3)
+              /                   \
+    (C1)--> (C2)-->(C3)-->(C4)-->(C5)
+    
+  ```
