@@ -85,6 +85,12 @@ Textbasierte Übersicht aller vergangenen Commit in einer Zeile
 
 `git log --graph`
 
+Übersicht der letzten Änderungen an einer Datei
+
+`git log <file>` oder `git blame <file>`
+
+> *Besser*: `git log --pretty=format:'%h %an %ad %s' merge.txt`
+
 ## Branches
 
 [ToC](#inhaltsverzeichnis)
@@ -161,6 +167,24 @@ Mergen des aktuellen branch mit einem feature branch
 
 `git merge <feature branch name>`
 
+#### Umgange mit merge Konflikten
+
+1) Nutzen von `git status`, um die Dateien in den Konflikte  entstandenen zu identifizieren
+2) Verwenden von `cat <file>`, um die Konflikte in den einzelnen Dateien zu identifizieren. Typischerweise sollte dies in etwa wie folgt aussehen:
+
+```text
+<<<<<<< HEAD
+< content that exists in the current branch>
+=======
+<content that is present in our merging branch>
+>>>>>>> <name of merging branch>
+```
+
+3) Lösen den Konflikts im Editor der Wahl, z.B. `vim` oder `VS Code` 
+4) `git commit` ausführen, um die Änderungen zu bestätigen
+
+> **HINWEIS**: Sind alle merge conflicts gelöst, wird der merge automatisch fortgeführt
+
 ### Rebasing
 
 Rebasing ist eine Alternative zum branch merging, wobei 3-way merges durch fast-forward merges ersetzt werden. Wurde ein feature branch erzeugt und sowohl in diesem, als auch in main branch ein/mehrere commits ausgeführt, kann ein merge nur durch einen 3-way merge erfolgt. Durch rebasing wird der Startpunkt des feature branch auf den letzten commit im main branch verschoben. Somit zweigt der feature branch vom letzten commit im master branch ab und ein einfacher fast-forward merge ist möglich.
@@ -206,6 +230,10 @@ Löschen eines nicht nicht gemergeten branch (z.B. wenn der branch nicht mehr ge
 
 `git branch -D <name>`
 
+Aktuellisieren der remote branchen im lokalen repository, z.B. wenn remote branches gelöscht wurden, lokal aber noch angezeigt werden
+
+`git remote update origin --prune`
+
 ## Änderungen Zwischenspeichern
 
 [ToC](#inhaltsverzeichnis)
@@ -232,7 +260,7 @@ Zwischenspeichern von untracked / ignored Dateien
 
 `git stash -a` // für untracke und ignorierte Dateien
 
-Anzeigen aller Zwischenspeicher
+Anzeigen aller Änderungen im Zwischenspeicher
 
 `git stash list`
 
@@ -271,9 +299,9 @@ git clean -df
 
 ### Reset
 
-Dies entspricht einem "Zurück in die Vergangenheit". Alle Commits die vor dem genannten Rücksprung-Commit liegen, exisieren danach nicht mehr. MIt `git reset` können ein oder mehrer Commits zurück genommen werden
+Reset entspricht einem "Zurück in die Vergangenheit". Alle Commits die vor dem genannten Rücksprung-Commit liegen, exisieren danach nicht mehr. Mit `git reset` können also ein oder mehrere Commits zurück genommen werden
 
-> Reset ist immer 'destruktiv', da es die Historie ändert. Insbesondere die  Verwendung von *hard* sollte mit Bedacht gewählt werden.
+> Reset ist immer 'destruktiv', da es die Historie ändert. Insbesondere die Verwendung von *hard* sollte mit Bedacht gewählt werden.
 
 Folgende Varianten werden unterschieden:
 
@@ -307,7 +335,7 @@ Folgende Varianten werden unterschieden:
 
 ### Revert
 
-Mit `revert` kann die letzte vergangene Änderungen rückgängig gemacht werden. Anders als bei `reset` wird bei `revert` jedoch nicht "die Zeit zurück gedreht", sondern es wird ein neues commit erzeugt, welche die letzten Änderungen Rückgängig macht. Die Historie bleibt bei `revert` also erhalten und wird nicht gelöscht.
+Mit `revert` kann die letzte vergangene Änderungen rückgängig gemacht werden. Anders als bei `reset` wird bei `revert` jedoch nicht "die Zeit zurück gedreht", sondern es wird ein neuer commit erzeugt, welcher die letzten Änderungen Rückgängig macht. Die Historie bleibt bei `revert` also erhalten und wird nicht gelöscht.
 
 Die Verwendung von `revert` ist sinnvoll, wenn Änderungen bereits in ein remote repository eingeflossen sind und andere Entwickler ggf. bereits ein pull auf diese remote repository ausgeführt haben.
 
@@ -525,7 +553,7 @@ git push -u origin main
 
 Mit pull requestes (PR), auch "Merge requests", bittet man andere Entwickler um ein Review der eigenen Änderungen im local repository branch, bevor diese in den remote repository branch eingespielt werden.
 
-## Git Tags
+## Git tags
 
 [ToC](#inhaltsverzeichnis)
 
