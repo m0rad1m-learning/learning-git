@@ -200,13 +200,13 @@ Mergen des aktuellen branch mit einem feature branch
 1) Nutzen von `git status`, um die Dateien in den Konflikte  entstandenen zu identifizieren
 2) Verwenden von `cat <file>`, um die Konflikte in den einzelnen Dateien zu identifizieren. Typischerweise sollte dies in etwa wie folgt aussehen:
 
-```text
-<<<<<<< HEAD
-<content that exists in the current branch>
-=======
-<content that is present in our merging branch>
->>>>>>> <name of merging branch>
-```
+  ```text
+  <<<<<<< HEAD
+  <content that exists in the current branch>
+  =======
+  <content that is present in our merging branch>
+  >>>>>>> <name of merging branch>
+  ```
 
 3) Lösen den Konflikts im Editor der Wahl, z.B. `vim` oder `VS Code`
 4) `git commit` ausführen, um die Änderungen zu bestätigen
@@ -615,7 +615,7 @@ Git Tags müssen explizit in das remote repositiry gepusht werden, da sie nicht 
 
 `git push <remote repository name, z.B. origin> <tag-version>`
 
-## Loeschen alter Branchs
+## Loeschen alter Branches
 
 Anzeigen aller local branches, die bereits gemergt wurden
 
