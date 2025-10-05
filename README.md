@@ -14,7 +14,7 @@
 10. [GitHub](#github)
 11. [Pull requests](#pull-requests)
 12. [Git Tags](#git-tags)
-13. [Löschen alter Branches](#löschen-alter-branches)
+13. [Loeschen alter Branches](#loeschen-alter-branches)
 14. [Git Squash](#git-squash)
 15. [ToDos](#todos)
 16. [Backup](#backup)
@@ -92,6 +92,24 @@ Textbasierte Übersicht aller vergangenen Commit in einer Zeile
 `git log <file>` oder `git blame <file>`
 
 > *Besser*: `git log --pretty=format:'%h %an %ad %s' merge.txt`
+
+### Änderungen in einem commit anzeigen
+
+Anzeigen der Dateien die in einem commit geändert wurden
+
+`git show --stat <commit-hash>`
+
+Anzeigen aller Änderungen in einem commit
+
+`git show <commit-hash>`
+
+Detailansicht aller Änderungen die in einem commit geändert wurden
+
+`git show -p <commit-hash>`
+
+Detailansicht aller Änderungen in einer spezifischen Datei die in einem commit geändert wurden
+
+`git show -p <commit-hash> -- <path to file>`
 
 ## Branches
 
@@ -224,7 +242,17 @@ git branch -d feature-1
                                  (FB1)-->(FB2)-->(FB3) <-- [HEAD, feature-1]
                                   /
    (C1)--> (C2)-->(C3)-->(C4)-->(C5) <-- [main]
-   ```
+```
+
+### Commits in einen anderen Branch verschieben
+
+1) Relevante commits herausfinden `git log` bzw. `git log -1` für nur den letzen commit
+2) Checkout des neuen branches `git checkout -b <new-branch>`
+3) Relevante commits auswählen `git cherry-pick <commit-hash1> <commit-hash2> ...` oder als Bereich `git cherry-pick <commit-hash1>^...<commit-hashN>`
+4) Löschen der commits im alten branch:
+
+   1) `git checkout <source-branch>`
+   2) `git rebase -i <commit-hash>^` oder falls nur der letzte commit betroffen ist `git reset --hard HEAD~1`
 
 ## Änderungen zwischenspeichern
 
@@ -557,7 +585,6 @@ git push -u origin main
 
 [ToC](#inhaltsverzeichnis)
 
-
 Mit pull requestes (PR), auch "Merge requests", bittet man andere Entwickler um ein Review der eigenen Änderungen im local repository branch, bevor diese in den remote repository branch eingespielt werden.
 
 ## Git tags
@@ -588,7 +615,7 @@ Git Tags müssen explizit in das remote repositiry gepusht werden, da sie nicht 
 
 `git push <remote repository name, z.B. origin> <tag-version>`
 
-## Löschen alter Branchs
+## Loeschen alter Branchs
 
 Anzeigen aller local branches, die bereits gemergt wurden
 
@@ -638,12 +665,11 @@ Löschen aller local branches außer *main* und *development*, die bereits gemer
 
 `git branch -r --merged | egrep -v "(^\*|main|development)" | sed 's/origin\///' | xargs -n 1 git push origin -d`
 
-  > ***ERKLÄRUNG**
-  
-     - `git branch -r --merged` listet all remote branches die bereits gelöscht wurden.
-     - `egrep -v "(^\*|main|development)"` exkludiert aus der Liste alle branches mit dem Namen *main* oder *development*
-     - `sed 's/origin\///'` filtert aus der vorheringen Liste alle `origin/` Einträge heraus
-     - `xargs -n 1 git push origin -d` löscht alle verbleibenden branches
+  > **ERKLÄRUNG**
+  > - `git branch -r --merged` listet all remote branches die bereits gelöscht wurden.
+  > - `egrep -v "(^\*|main|development)"` exkludiert aus der Liste alle branches mit dem Namen *main* oder *development*
+  > - `sed 's/origin\///'` filtert aus der vorheringen Liste alle `origin/` Einträge heraus
+  > - `xargs -n 1 git push origin -d` löscht alle verbleibenden branches
 
 ### Löschen von remote branches
 
