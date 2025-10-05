@@ -5,24 +5,26 @@
 1. [Basiskonzepte](#basiskonzepte)
 2. [Basisbefehle](#basisbefehle)
 3. [Branches](#branches)
-4. [Änderungen Zwischenspeichern](#änderungen-zwischenspeichern)
+4. [Änderungen zwischenspeichern](#änderungen-zwischenspeichern)
 5. [Änderungen rückgängig machen](#änderungen-rückgängig-machen)
 6. [Inhalte löschen](#inhalte-löschen)
 7. [Git under the hood](#git-under-the-hood)
-8. [Git Ingore](#git-ignore)
+8. [Git Ignore](#git-ignore)
 9. [Git Config](#git-config)
 10. [GitHub](#github)
 11. [Pull requests](#pull-requests)
 12. [Git Tags](#git-tags)
-13. [ToDos](#todos)
-14. [Backup](#backup)
+13. [Löschen alter Branches](#löschen-alter-branches)
+14. [Git Squash](#git-squash)
+15. [ToDos](#todos)
+16. [Backup](#backup)
 
 ## Basiskonzepte
 
 [ToC](#inhaltsverzeichnis)
 
-- Working Tree --> Staging area --> (Local) Git Repository
-- Git file lifecylce: Untracked --> Modified --> Staged --> Unmodified
+- Working Tree --> Staging area --> (Local) Git Repository --> (Upstream / Remote) Git Repository
+- Git file lifecycle: Untracked --> Modified --> Staged --> Unmodified
 
 ## Basisbefehle
 
@@ -67,7 +69,7 @@ git commit --amend --no-edit
 # In der Staging Area  liegt nun die Datei2.txt. Der 'amend' Befehlt überführt diese in das Local Repository, so dass der Commit Datei1.txt & Datei2.txt umfasst, also geändert wurde. Die Commit Nachricht selbst wurde nicht geändert.
 ```
 
-### Übersicht aller (commit) Änderungen
+## Commit-Historie anzeigen
 
 Textbasierte Übersicht
 
@@ -99,7 +101,7 @@ Textbasierte Übersicht aller vergangenen Commit in einer Zeile
 
 Nur lokale branches
 
-`git branch`
+`git branch` oder `git branch -l`
 
 Nur remote branches
 
@@ -112,6 +114,14 @@ Alle branches
 Anzeigen der upstream / remote (tracking) branches meiner local branches
 
 `git branch -vv`
+
+Kombination zum anzeigen aller local / remote (tracking) branches und deren upstreams
+
+`git branch -avv`
+
+Formatierte Liste aller lokalen Branches mit detaillierten Informationen
+
+`git for-each-ref --sort=committerdate refs/heads/ --format '%(HEAD) %(align:35)%(color:blue)%(refname:short)%(color:reset)%(end) - %(color:red)%(objectname:short)%(color:reset) - %(align:40)%(contents:subject)%(end) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'`
 
 ### Branch erstellen / wechseln
 
@@ -174,13 +184,13 @@ Mergen des aktuellen branch mit einem feature branch
 
 ```text
 <<<<<<< HEAD
-< content that exists in the current branch>
+<content that exists in the current branch>
 =======
 <content that is present in our merging branch>
 >>>>>>> <name of merging branch>
 ```
 
-3) Lösen den Konflikts im Editor der Wahl, z.B. `vim` oder `VS Code` 
+3) Lösen den Konflikts im Editor der Wahl, z.B. `vim` oder `VS Code`
 4) `git commit` ausführen, um die Änderungen zu bestätigen
 
 > **HINWEIS**: Sind alle merge conflicts gelöst, wird der merge automatisch fortgeführt
@@ -216,25 +226,7 @@ git branch -d feature-1
    (C1)--> (C2)-->(C3)-->(C4)-->(C5) <-- [main]
    ```
 
-### Branches löschen (z.B. nach einem Merge)
-
-Löschen eines (bereits gemergten) local branches
-
-`git branch -d <name>`
-
-Löschen eines (bereits gemergten) remote branches
-
-`git push origin --delete <name>`
-
-Löschen eines nicht nicht gemergeten branch (z.B. wenn der branch nicht mehr gebraucht wird)
-
-`git branch -D <name>`
-
-Aktuellisieren der remote branchen im lokalen repository, z.B. wenn remote branches gelöscht wurden, lokal aber noch angezeigt werden
-
-`git remote update origin --prune`
-
-## Änderungen Zwischenspeichern
+## Änderungen zwischenspeichern
 
 [ToC](#inhaltsverzeichnis)
 
@@ -276,7 +268,7 @@ Zwischenspeicher löschen
 
 ```shell
 `git stash drop <stash id>`
-# All stahses
+# All stashes
 git stash clear
 ```
 
@@ -297,6 +289,17 @@ git clean -f
 git clean -df
 ```
 
+### Restore
+
+Löschen von Änderungen an getrackten Dateien im Working Tree
+
+```shell
+# Löschen aller Änderungen
+git restore .
+# Löschen bestimmter Änderungen 
+git restore <path-to-file>
+```
+
 ### Reset
 
 Reset entspricht einem "Zurück in die Vergangenheit". Alle Commits die vor dem genannten Rücksprung-Commit liegen, exisieren danach nicht mehr. Mit `git reset` können also ein oder mehrere Commits zurück genommen werden
@@ -305,12 +308,12 @@ Reset entspricht einem "Zurück in die Vergangenheit". Alle Commits die vor dem 
 
 Folgende Varianten werden unterschieden:
 
-- *hard*: Alle Änderungen im Working Direcoty, der Staging Area und ggf. der Commit History werden zurück gesetzt
+- *hard*: Alle Änderungen im Working Directory, der Staging Area und ggf. der Commit History werden zurück gesetzt
   
   ```shell
   # Reset auf den HEAD löscht nur alle Änderungen im Working Tree und der Staging Area
   git reset --hard  # HEAD wird implizit angenommen, alternativ z.B. "origin/main"
-  # Reset auf eien spezifischen Commit in der Vergangenheit, alle Änderungen danach sind verlorten
+  # Reset auf einen spezifischen Commit in der Vergangenheit, alle Änderungen danach sind verloren
   git reset --hard "<commit ID (first 6 chars)>"
   ```
 
@@ -376,7 +379,7 @@ git cat-file -s <commit hash (first 6 chars)>  # Size of the object
 Informationen zu Dateien in der Staging area
 `git ls-files -s`
 
-## Git Ignore
+## Git ignore
 
 [ToC](#inhaltsverzeichnis)
 
@@ -456,10 +459,6 @@ Nach Erstellung eines Git Hub Repositories
 
 ### Verknüpfen eines local mit einem remote repositories
 
-Verknüpfen des local mit dem remote repository
-
-`git remote add <remote repository name, z.B. origin> <url des remote repository>`
-
 Anzeige aller remote repository, denen im local reporistory gefolgt wird
 
 `git remote`
@@ -471,6 +470,14 @@ Anzeige aller remote repository, denen im local reporistory gefolgt wird
 Details zum remote repository
 
 `git remote show <name of remote repository, z.b. origin>`
+
+Verknüpfen des local mit dem remote repository
+
+`git remote add <remote repository name, z.B. origin> <url des remote repository>`
+
+Ändern der Verknüpfung des local mit dem remote repository
+
+`git remote set-url origin <new-url>`
 
 Initiales klonen des remote repository nach local
 Per Default wird nur der default branch des remote repository zu einem tracking branch im local repository, alle weiteren branches werden nicht geklont
@@ -500,12 +507,12 @@ Daten aus dem remote repository laden
 
 `git pull`
 
-    > Änderungen aus dem remote repository sollten regelmäßig in das local repository überspielt werden.
-    
-    Git pull" führt implit zwei Schritte aus:
+  > Änderungen aus dem remote repository sollten regelmäßig in das local repository überspielt werden.
 
-    1. *git fetch*: Übertragen aller Updates / Changes etc. des remote repository in das local repository als objects (blob, tree, commit), jedoch ohne Änderungen am local working directory / staging area
-    2. *git merge* (Basis: FETCH_HEAD) : 2- oder 3-way merge zwischen local repository und local working area & staging area. Dies betrifft alle tracking branches, beginnend beim aktuell ausgecheckten branch
+  Git pull" führt implit zwei Schritte aus:
+
+  1. *git fetch*: Übertragen aller Updates / Changes etc. des remote repository in das local repository als objects (blob, tree, commit), jedoch ohne Änderungen am local working directory / staging area
+  2. *git merge* (Basis: FETCH_HEAD) : 2- oder 3-way merge zwischen local repository und local working area & staging area. Dies betrifft alle tracking branches, beginnend beim aktuell ausgecheckten branch
 
 Vor der Durchführung mittels `git branch -vv` prüfen, ob und welche local branches tracking branches sind
 
@@ -580,6 +587,110 @@ Erstellen eines `git tags` der nachträglich auf einen bestimmten Commit verweis
 Git Tags müssen explizit in das remote repositiry gepusht werden, da sie nicht implizit durch `git push` übertragen werden.
 
 `git push <remote repository name, z.B. origin> <tag-version>`
+
+## Löschen alter Branchs
+
+Anzeigen aller local branches, die bereits gemergt wurden
+
+`git branch --merged`
+
+Anzeigen aller local branches, die noch nicht gemergt wurden
+
+`git branch --no-merged`
+
+Anzeigen aller remote branches, die bereits in den local branch gemergt wurden
+
+`git branch -r --merged`
+
+Anzeigen aller remote branches, die noch nicht in den local branch gemergt wurden
+
+`git branch -r --no-merged`
+
+### Löschen von local branches (z.B. nach einem merge)
+
+Löschen eines (bereits gemergten) local branches
+
+`git branch -d <name>`
+
+Löschen eines nicht nicht gemergeten branch (z.B. wenn der branch nicht mehr gebraucht wird)
+
+`git branch -D <name>`
+
+Löschen aller local branches außer *main* und *development*, die bereits gemergt wurden
+
+`git branch --merged | egrep -v "(^\*|main|development)" | xargs git branch -d`
+
+#### Local branches mit remote branches abgleichen und löschen
+
+Anzeigen welche remote branches bereits gelöscht wurden und daher auch deren local branch gelöscht werden könnte
+
+`git remote prune origin --dry-run`
+
+Löschen der local branches, die remote bereits gelöscht wurden
+
+`git remote prune origin`
+
+Aktualisieren der lokalen Referenzen auf das Remote-Repository (origin) und entfernen der lokale Referenzen auf Remote-Branches, die im Remote-Repository nicht mehr existieren
+
+`git remote update origin --prune`
+
+Löschen aller local branches außer *main* und *development*, die bereits gemergt wurden
+
+`git branch -r --merged | egrep -v "(^\*|main|development)" | sed 's/origin\///' | xargs -n 1 git push origin -d`
+
+  > ***ERKLÄRUNG**
+  
+     - `git branch -r --merged` listet all remote branches die bereits gelöscht wurden.
+     - `egrep -v "(^\*|main|development)"` exkludiert aus der Liste alle branches mit dem Namen *main* oder *development*
+     - `sed 's/origin\///'` filtert aus der vorheringen Liste alle `origin/` Einträge heraus
+     - `xargs -n 1 git push origin -d` löscht alle verbleibenden branches
+
+### Löschen von remote branches
+
+Löschen eines (bereits gemergten) remote branches
+
+`git push origin --delete <name>`
+
+## Git Squash
+
+[ToC](#inhaltsverzeichnis)
+
+Git Squash ist eine Technik, um mehrere aufeinanderfolgende Commits in einen einzigen Commit zusammenzufassen. Dies ist besonders nützlich, um die Git-Historie übersichtlich zu halten und zusammengehörige Änderungen in einem sauberen Commit zu bündeln.
+
+### Interaktives Rebase mit Squash
+
+```shell
+# Beispiel: Die letzten 3 Commits zusammenfassen
+git rebase -i HEAD~3
+```
+
+Dies öffnet einen Editor mit einer Liste der letzten 3 Commits. Hier kann man "squash" oder "s" für die Commits verwenden, die mit dem vorherigen Commit zusammengefasst werden sollen:
+
+```text
+pick abc123f First commit
+squash def456g Second commit
+squash ghi789h Third commit
+```
+
+### Beispiel Squash Workflow
+
+```text
+# Ausgangssituation:
+main: A -> B -> C (HEAD)
+
+# Commit Historie:
+C: "Add error handling"
+B: "Fix typo in function name"
+A: "Add new function"
+
+# Nach dem Squash:
+main: A -> D (HEAD)
+
+# Neue Commit Historie:
+D: "Add new function with error handling"
+```
+
+> **Best Practice**: Squash sollte verwendet werden, bevor Änderungen in ein öffentliches Repository gepusht werden. Nach dem Push sollte kein Squash mehr durchgeführt werden, da dies die Historie für andere Entwickler ändern würde.
 
 ## ToDos
 
