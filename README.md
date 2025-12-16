@@ -1,282 +1,690 @@
-# Git
+# Git — Guide and Cheat Sheet
 
-## Table of contents
-
-1. [Basic concepts](#basic-concepts)  
-2. [Repository setup](#repository-setup)  
-3. [Core commands](#core-commands)  
-4. [Viewing commit history](#viewing-commit-history)  
-5. [Branches](#branches)  
-6. [Temporarily saving changes (stash)](#temporarily-saving-changes-stash)  
-7. [Undoing changes](#undoing-changes)  
-8. [Deleting content](#deleting-content)  
-9. [Git under the hood](#git-under-the-hood)  
-10. [Git ignore](#git-ignore)  
-11. [Git config](#git-config)  
-12. [GitHub / remotes](#github--remotes)  
-13. [Pull requests](#pull-requests)  
-14. [Git tags](#git-tags)  
-15. [Cleaning up old branches](#cleaning-up-old-branches)  
-16. [Git squash](#git-squash)  
-17. [Backup (concept sketch)](#backup-concept-sketch)  
-
-***
-
-## Basic concepts
-
-[ToC](#table-of-contents)
-
-- Working tree → Staging area → (Local) Git repository → (Upstream / remote) Git repository  
-- Git file lifecycle: Untracked → Modified → Staged → Unmodified  
-
-***
-
-## Repository setup
-
-[ToC](#table-of-contents)
-
-Initialize a new local repository in the current directory:
-
-`git init`
-
-Clone an existing remote repository:
-
-`git clone <url>`
-
-Clone into a specific folder:
-
-`git clone <url> <folder>`
-
-***
-
-## Core commands
-
-[ToC](#table-of-contents)
-
-Overview of repository / status / files to commit etc.:
-
-`git status`
-
-Add specific changes from the working tree to the staging area:
-
-`git add <filename>`
-
-Add all changes from the working tree to the staging area:
-
-`git add .`
-
-Add only tracked files (no new untracked files):
-
-`git add -u`
-
-Remove specific changes from the staging area:
-
-`git rm --cached <filename>`
-
-Commit changes from the staging area to the local repository:
-
-`git commit -m "<message>"`
-
-Stage and commit tracked changes in one command:
-
-`git commit -am "<message>"`
-
-Change the last commit message (the last commit is replaced by a new one):
-
-`git commit --amend -m "<message>"`
-
-Change the content of the last commit:
-
-```shell
-git add File1.txt
-git commit -m "Changes to File1.txt & File2.txt"
-# File2.txt was forgotten in the staging area, so it is missing in the local repository
-git add File2.txt
-git commit --amend --no-edit
-# File2.txt is now in the staging area. The 'amend' command moves it into the local
-# repository so that the commit now includes File1.txt & File2.txt. The commit
-# message itself was not changed.
-```
-
-Show differences of unstaged changes:
-
-`git diff`
-
-Show differences of staged changes:
-
-`git diff --staged`
+Table of contents
+1. [Introduction & Prerequisites](#introduction--prerequisites)
+2. [Quick Start](#quick-start)
+3. [Basic Workflow](#basic-workflow)
+4. [Inspecting History](#inspecting-history)
+5. [Branching & Switching](#branching--switching)
+6. [Merging & Rebasing](#merging--rebasing)
+7. [Moving Commits & Cherry-pick](#moving-commits--cherry-pick)
+8. [Working with Remotes (GitHub)](#working-with-remotes-github)
+9. [Pull Requests & Collaboration](#pull-requests--collaboration)
+10. [Stashing (Temporary Work)](#stashing-temporary-work)
+11. [Undoing Mistakes & Recovery](#undoing-mistakes--recovery)
+12. [Deleting Files & Branches](#deleting-files--branches)
+13. [Tags & Releases](#tags--releases)
+14. [.gitignore](#gitignore)
+15. [Git Config & Useful Settings](#git-config--useful-settings)
+16. [Git Internals (under the hood)](#git-internals-under-the-hood)
+17. [Command Cheat Sheet (compact)](#command-cheat-sheet-compact)
+18. [Further Reading](#further-reading)
+19. [Backup / Visual Example](#backup--visual-example)
 
 ---
 
-## Viewing commit history
+## Introduction & Prerequisites
 
-[ToC](#table-of-contents)
+This document is a concise practical guide to common Git operations and recommended commands. It assumes you have Git installed.
 
-Text-based overview:
+Recommended global setup (one-time, per machine):
 
-`git log`
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+git config --global core.editor "code --wait"       # VS Code example
+git config --global init.defaultBranch main
+# safer push default
+git config --global push.default simple
+```
 
-Text-based one-line overview of recent commits:
+If you sign commits with GPG/SSH:
 
-`git log --oneline`
-
-One-line overview of all past commits:
-
-`git log --pretty=oneline`
-
-Overview with a graphical view (links between parent trees):
-
-`git log --graph --oneline --all`
-
-Show history of changes to a file:
-
-`git log <file>` or `git blame <file>`
-
-Better formatted history for a specific file:
-
-`git log --pretty=format:'%h %an %ad %s' <file>`
-
-### Show changes in a commit
-
-Show which files were changed in a commit:
-
-`git show --stat <commit-hash>`
-
-Show all changes in a commit (diff):
-
-`git show <commit-hash>`
-
-Detailed view of all changes in a commit:
-
-`git show -p <commit-hash>`
-
-Detailed view of changes in a specific file in a commit:
-
-`git show -p <commit-hash> -- <path-to-file>`
+```bash
+git config --global commit.gpgsign true
+git config --global user.signingkey <your-key-id>
+```
 
 ---
 
-## Branches
+## Quick Start
 
-[ToC](#table-of-contents)
+Create a new repository:
 
-### List branches
-
-Local branches only:
-
-`git branch` or `git branch -l`
-
-Remote branches only:
-
-`git branch -r`
-
-All branches:
-
-`git branch -a`
-
-Show upstream / remote tracking branches of local branches:
-
-`git branch -vv`
-
-All local / remote tracking branches and their upstreams:
-
-`git branch -avv`
-
-Formatted list of local branches with detailed information:
-
-```shell
-git for-each-ref –sort=committerdate refs/heads/ 
-–format ‘%(HEAD) %(align:35)%(color:blue)%(refname:short)%(color:reset)%(end) - %(color:red)%(objectname:short)%(color:reset) - %(align:40)%(contents:subject)%(end) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))’
+```bash
+mkdir my-project
+cd my-project
+git init
+# make files...
+git add .
+git commit -m "Initial commit"
 ```
 
-### Create / switch branches
+Clone an existing repository:
 
-Create a new local branch:
+```bash
+git clone git@github.com:owner/repo.git
+# or HTTPS
+git clone https://github.com/owner/repo.git
+```
 
-> Works also if the branch exists only on the remote; in that case the new local branch automatically becomes a tracking branch of the remote branch.
+Set a remote and push initial branch (if needed):
 
-`git branch <branch-name>`
+```bash
+git remote add origin git@github.com:owner/repo.git
+git push -u origin main
+```
 
-Create a new local branch and switch to it:
+---
 
-`git checkout -b <branch-name>`
+## Basic Workflow
 
-(preferred in newer Git versions:)
+Typical flow: Working Directory → Staging Area → Local Repository → Remote
 
-`git switch -c <branch-name>`
+Common commands:
 
-Switch to an existing branch:
+- Check status:
 
-`git checkout <branch-name | commit-hash(first 6 chars)>`
+```bash
+git status
+```
 
-Or (newer command):
+- Stage files:
 
-`git switch <branch-name>`
+```bash
+git add <file>           # stage a file
+git add -A               # stage all changes (new, modified, deleted)
+git add .                # stage changes in current directory
+```
 
-#### Example: Checkout of a dedicated commit hash in ‘main’ branch
+- Unstage a file:
+
+```bash
+git restore --staged <file>   # safer than git reset for single files
+```
+
+- Commit:
+
+```bash
+git commit -m "Short message" -m "Longer description (optional)"
+git commit -am "Edit tracked files and commit in one step"  # only stages tracked files
+```
+
+- Amend last commit (fix staged content or commit message):
+
+```bash
+git add <file>
+git commit --amend --no-edit   # add staged changes to previous commit without changing message
+git commit --amend -m "New message"   # change message
+```
+
+Notes:
+- `git commit -am` only stages changes to already tracked files.
+- Use amend only for commits not yet pushed to a shared remote (or coordinate with your team if you must rewrite history).
+
+---
+
+## Inspecting History
+
+Show commits:
+
+```bash
+git log
+git log --oneline
+git log --oneline --graph --decorate --all   # compact graphic history
+git log --pretty=format:'%h %an %ad %s' --date=short
+```
+
+Show file history and blame:
+
+```bash
+git log -- <path/to/file>
+git blame <path/to/file>
+```
+
+Show a commit:
+
+```bash
+git show <commit-hash>
+git show --stat <commit-hash>   # files changed summary
+git show -p <commit-hash>       # patch/diff
+git show -p <commit-hash> -- path/to/file
+```
+
+Diffs:
+
+```bash
+git diff                # unstaged changes
+git diff --staged       # staged vs HEAD
+git diff HEAD~1..HEAD   # changes in last commit
+```
+
+---
+
+## Branching & Switching
+
+List branches:
+
+```bash
+git branch                # local branches
+git branch -r             # remote branches
+git branch -a             # all branches
+git branch -vv            # show upstream tracking info
+```
+
+Create and switch:
+
+```bash
+git branch feature-x                # create local branch
+git switch feature-x                # switch to branch (preferred)
+git switch -c feature-x             # create + switch
+# older:
+git checkout -b feature-x
+```
+
+Switch by commit (detached HEAD):
+
+```bash
+git switch --detach <commit-hash>
+```
+
+Rename branch:
+
+```bash
+git branch -m old-name new-name    # rename local
+git branch -M new-name             # rename current branch (force)
+```
+
+Show branch details (custom format):
+
+```bash
+git for-each-ref --sort=committerdate refs/heads/ --format '%(refname:short) %(committerdate:relative) - %(authorname) - %(contents:subject)'
+```
+
+---
+
+## Merging & Rebasing
+
+Merging:
+
+```bash
+git switch main
+git merge feature-x    # merge feature into main
+```
+
+- Fast-forward merge happens if main has no new commits since branch point.
+- 3-way merge creates a merge commit when both branches have diverged.
+
+Resolving merge conflicts:
+1. Use `git status` to find conflicted files.
+2. Open files, look for conflict markers:
+
+```
+<<<<<<< HEAD
+content in current branch
+=======
+content in merging branch
+>>>>>>> feature-x
+```
+
+3. Edit and remove markers, `git add <file>`, then `git commit` (or `git merge --continue` if using a merge tool).
+
+Rebasing (rewrite history to create a linear sequence):
+
+```bash
+git switch feature-x
+git rebase main
+# resolve conflicts if any, then
+git switch main
+git merge feature-x     # should be fast-forward now
+git branch -d feature-x
+```
+
+Interactive rebase (squash / reorder / edit history):
+
+```bash
+git rebase -i HEAD~3
+```
+
+Warnings:
+- Do not rebase commits that have been pushed to a shared/public remote unless everyone who pulled those commits coordinates and expects a history rewrite.
+- If you must update pushed commits, prefer `git push --force-with-lease` over `--force`:
+
+```bash
+git push --force-with-lease origin feature-x
+```
+
+---
+
+## Moving Commits & Cherry-pick
+
+Cherry-pick commits onto another branch:
+
+```bash
+git switch -c bugfix-from-main
+git cherry-pick <commit-hash>  # repeat for multiple commits
+# or a range
+git cherry-pick <start>^..<end>
+```
+
+To move commits away from a branch and remove them from the old branch:
+1. Identify commits: `git log`
+2. Create a new branch: `git switch -c new-branch`
+3. Cherry-pick the commits.
+4. Remove commits from the old branch (interactive rebase or reset — see Undoing Mistakes).
+
+---
+
+## Working with Remotes (GitHub)
+
+List remotes:
+
+```bash
+git remote -v
+git remote show origin
+```
+
+Add / change remote:
+
+```bash
+git remote add origin git@github.com:owner/repo.git
+git remote set-url origin git@github.com:owner/repo.git
+```
+
+Fetch (download objects and refs, no change to working tree):
+
+```bash
+git fetch
+git fetch --all
+git fetch origin --prune       # remove refs to deleted remote branches locally
+```
+
+Pull (fetch + merge or fetch + rebase):
+
+```bash
+git pull                       # default (merge)
+git pull --rebase origin main  # fetch and rebase local commits on top of remote main
+```
+
+Push:
+
+```bash
+git push                       # push current branch to its upstream
+git push -u origin feature-x   # set upstream and push
+git push origin --delete branch-name   # delete remote branch
+```
+
+Prune / cleanup stale remote-tracking branches:
+
+```bash
+git remote prune origin
+git remote update origin --prune
+```
+
+Safe force-push pattern:
+
+```bash
+# ensure you only overwrite what you expect
+git push --force-with-lease origin feature-x
+```
+
+---
+
+## Pull Requests & Collaboration
+
+A typical collaborative flow:
+1. Create a feature branch: `git switch -c feature/my-change`
+2. Commit and push: `git push -u origin feature/my-change`
+3. Open a pull request (PR) on GitHub from `feature/my-change` into `main` (or your target branch).
+4. Request reviews, address comments, push fixes to the same branch.
+5. Squash & merge or merge with commit, according to project policy.
+
+Tips:
+- Keep PRs small and focused.
+- Rebase locally to clean up WIP commits before pushing (only if branch is not yet shared or team agrees).
+- Use CI checks and link them in the PR.
+
+---
+
+## Stashing (Temporary Work)
+
+Save local changes without committing:
+
+```bash
+git stash push -m "WIP: explanation"
+git stash list
+git stash show stash@{0}
+git stash apply stash@{0}    # keep stash entry
+git stash pop                 # apply and drop stash
+# stash untracked or ignored
+git stash push -u -m "WIP including untracked"
+git stash push -a -m "WIP including ignored"
+# clear
+git stash drop stash@{0}
+git stash clear
+```
+
+---
+
+## Undoing Mistakes & Recovery
+
+Clean untracked files:
+
+```bash
+git clean -n      # dry-run
+git clean -f      # remove untracked files
+git clean -df     # remove untracked files & directories
+```
+
+Restore working tree files:
+
+```bash
+git restore <file>               # discard working-tree changes to file
+git restore .                    # discard all working-tree changes
+git restore --staged <file>      # unstage file (equivalent to git reset HEAD <file>)
+```
+
+Reset (history-rewriting, destructive operations):
+
+- Soft reset (move HEAD, keep index & working tree):
+
+```bash
+git reset --soft <commit>
+```
+
+- Mixed reset (default; move HEAD, reset index, keep working tree):
+
+```bash
+git reset --mixed <commit>
+# or simply
+git reset <commit>
+```
+
+- Hard reset (move HEAD, reset index and working tree — destructive):
+
+```bash
+git reset --hard <commit>
+```
+
+Use cases and warnings:
+- Avoid `git reset --hard` on branches that others use. Consider creating a backup branch before destructive resets:
+
+```bash
+git branch backup-before-reset
+```
+
+Revert (non-destructive way to undo a commit by creating a new commit that undoes a previous one):
+
+```bash
+git revert <commit-hash>
+# revert multiple commits (from newest to oldest)
+git revert <newer>^..<older>
+```
+
+Reflog (find lost commits):
+
+```bash
+git reflog
+# recover a lost commit
+git switch -c recover <commit-hash-from-reflog>
+```
+
+Cherry-pick (apply commits from another branch):
+
+```bash
+git cherry-pick <commit-hash>
+```
+
+---
+
+## Deleting Files & Branches
+
+Delete tracked file (stages deletion):
+
+```bash
+git rm <file>
+git rm -n <file>     # dry-run
+git rm -r <dir>      # recursive
+git commit -m "Remove file"
+```
+
+Remove a file only from the index (keep in working tree):
+
+```bash
+git rm --cached <file>
+```
+
+Delete branches:
+
+```bash
+git branch -d <name>    # safe delete, only if merged
+git branch -D <name>    # force delete
+git push origin --delete <name>   # delete remote branch
+```
+
+List branches merged into current:
+
+```bash
+git branch --merged
+git branch --no-merged
+git branch -r --merged
+```
+
+Cleanup merged branches (example skip main/development):
+
+```bash
+# local
+git branch --merged | egrep -v "(^\*|main|development)" | xargs -r git branch -d
+# remote cleanup (careful!)
+git branch -r --merged | egrep -v "(^\*|origin/main|origin/development)" | sed 's/origin\///' | xargs -r -n 1 git push origin --delete
+```
+
+Prune remote-tracking branches:
+
+```bash
+git remote prune origin --dry-run
+git remote prune origin
+```
+
+---
+
+## Tags & Releases
+
+List tags:
+
+```bash
+git tag
+```
+
+Annotated tag (preferred):
+
+```bash
+git tag -a v1.0.0 -m "Release v1.0.0"
+# sign the tag (if configured)
+git tag -s v1.0.0 -m "Signed release"
+```
+
+Tag a specific commit:
+
+```bash
+git tag -a v1.0.0 <commit-hash> -m "Message"
+```
+
+Push tags to remote:
+
+```bash
+git push origin v1.0.0
+# push all tags
+git push origin --tags
+```
+
+---
+
+## .gitignore
+
+Create `.gitignore` in project root to ignore files/folders:
+
+Example:
+
+```
+# Ignore specific files
+file-1.txt
+
+# Ignore folder
+/bin/
+
+# Ignore temp files
+*.tmp
+
+# Node modules
+node_modules/
+```
+
+Remember: `.gitignore` itself should be committed.
+
+If you accidentally committed files that should be ignored, remove them from the index:
+
+```bash
+git rm --cached path/to/file
+git commit -m "Stop tracking file"
+```
+
+---
+
+## Git Config & Useful Settings
+
+Config levels:
+- System: /etc/gitconfig
+- Global: ~/.gitconfig
+- Local: <repo>/.git/config
+
+Show config:
+
+```bash
+git config --list
+git config --global --list
+cat .git/config
+```
+
+Examples of useful settings:
+
+```bash
+# safer default for pushes
+git config --global push.default simple
+
+# color and helpful abbreviations
+git config --global color.ui auto
+git config --global alias.st status
+git config --global alias.co checkout
+git config --global alias.br branch
+git config --global alias.hist "log --oneline --graph --decorate --all"
+```
+
+Sample ~/.gitconfig snippet:
 
 ```text
-tial state
-(C1)–> (C2)–>(C3)–>(C4)–>(C5) <– HEAD, main
-Checkout commit hash
-git checkout c2
-Final state (detached HEAD state)
-(C1)–> (C2)–>(C3)–>(C4)–>(C5) <– main | HEAD
+[user]
+    name = YOUR NAME
+    email = you@example.com
+[init]
+    defaultBranch = main
+[commit]
+    gpgsign = true
 ```
 
-### Rename branches
+---
 
-Rename the current local branch:
+## Git Internals (under the hood)
 
-`git branch -M <name>`
+Inspect Git objects:
 
-Rename another local branch:
-
-`git branch -m <old-name> <new-name>`
-
-### Merge branches (in the receiving branch, e.g. “main”)
-
-Git merge concepts:
-
-- **Fast-forward merge**: `main` / `HEAD` pointers are moved to the last commit of the feature branch. This only works if no commits were added to `main` after the feature branch was created.  
-- **3-way merge**: A new commit is created on `main` that has two parents: the last commit on `main` and the last commit on the feature branch.
-
-Merge the current branch with a feature branch:
-
-`git merge <feature-branch-name>`
-
-### Handling merge conflicts
-
-1. Use `git status` to identify files with conflicts.  
-2. Use `cat <file>` to inspect conflicts in each file. Typical conflict markers: `<<<<< HEAD`
-3. Resolve the conflict in an editor of choice, e.g.  vim  or VS Code.
-4. Run  git add  on resolved files and then  git commit  to confirm the merge.
-   When all merge conflicts are resolved and staged, the merge continues automatically.
-
-### Rebasing
-
-Rebasing is an alternative to merging that can replace 3-way merges with fast-forward merges. If commits were added both to a feature branch and to main , a merge normally requires a 3-way merge. By rebasing, the starting point of the feature branch is moved to the latest commit on  main , resulting in a linear history.
-
-```shell
-git checkout feature-1
-git rebase main
-git checkout main
-git merge feature-1
-git branch -d feature-1
+```bash
+git cat-file -t <object>   # type of object (commit, tree, blob, tag)
+git cat-file -p <object>   # pretty print object content
+git cat-file -s <object>   # size
 ```
 
-Example: Rebasing a feature branch
-========
-# Initial state
-         (FB1)-->(FB2)-->(FB3) <-- [HEAD, feature-1]
-          /
-(C1)-->(C2)-->(C3)-->(C4)-->(C5) <-- [main]
- 
-# Commands
-git checkout feature-1
-git rebase main
+Staging area / index view:
 
-# State
-                            (FB1)-->(FB2)-->(FB3) <-- [HEAD, feature-1]
-                             /
-(C1)-->(C2)-->(C3)-->(C4)-->(C5) <-- [main]
+```bash
+git ls-files -s
+```
+
+Show refs:
+
+```bash
+git show-ref
+```
+
+Use these when you need to debug repository problems.
+
+---
+
+## Command Cheat Sheet (compact)
+
+Quick list of commonly used commands:
+
+- Setup:
+  - git config --global user.name "Name"
+  - git config --global user.email "email@example.com"
+
+- Create / clone:
+  - git init
+  - git clone <url>
+
+- Work:
+  - git status
+  - git add <file>
+  - git commit -m "msg"
+  - git commit --amend
+  - git restore <file>
+  - git restore --staged <file>
+
+- Branch:
+  - git branch
+  - git switch -c feature
+  - git switch feature
+  - git merge feature
+  - git rebase main
+
+- Remote:
+  - git remote -v
+  - git fetch --all
+  - git pull --rebase
+  - git push -u origin feature
+  - git push --force-with-lease
+
+- History & recovery:
+  - git log --oneline --graph --decorate --all
+  - git show <commit>
+  - git reflog
+  - git reset --hard <commit>  # destructive—use with care
+  - git revert <commit>
+
+- Stash:
+  - git stash push -m "WIP"
+  - git stash pop
+
+- Tags:
+  - git tag -a v1.0 -m "release"
+  - git push origin v1.0
+
+---
+
+## Further Reading
+
+- Pro Git book: https://git-scm.com/book/en/v2
+- Git reference: https://git-scm.com/docs
+- GitHub docs: https://docs.github.com
+
+---
+
+## Backup / Visual Example
+
+Visual of branches / merge:
+
+```
+          (FB1) -> (FB2) -> (FB3)
+           /                       \
+(C1) -> (C2) -> (C3) -> (C4) -> (C5)
+```
