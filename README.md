@@ -487,7 +487,7 @@ To move commits away from a branch and remove them from the old branch:
 1. Identify commits: `git log`
 2. Create a new branch: `git switch -c new-branch`
 3. Cherry-pick the commits.
-4. Remove commits from the old branch (interactive rebase or reset — see Undoing Mistakes).
+4. Remove commits from the old branch (interactive rebase or reset — see Undoing Changes, e.g. via `git reset --hard HEAD~1`).
 
 ---
 
