@@ -16,6 +16,7 @@
     4. [Merge Branches](#merge-branches)
     5. [Resolving merge conflicts](#resolving-merge-conflicts)
     6. [Rebasing](#rebasing)
+        1. [Interactive rebase / git squash](#interactive-rebase--git-squash)
 9. [Moving Commits \& Cherry-pick](#moving-commits--cherry-pick)
 10. [Stashing (Temporary Work)](#stashing-temporary-work)
     1. [Stash Basics](#stash-basics)
@@ -391,12 +392,6 @@ git rebase main
 (C1)-->(C2)-->(C3)-->(C4)-->(C5) <-- main
 ```
 
-Interactive rebase (squash / reorder / edit history):
-
-```bash
-git rebase -i HEAD~3
-```
-
 Warnings:
 
 - Do not rebase commits that have been pushed to a shared/public remote unless everyone who pulled those commits coordinates and expects a history rewrite.
@@ -404,6 +399,71 @@ Warnings:
 
 ```bash
 git push --force-with-lease origin feature-x
+```
+
+#### Interactive rebase / git squash
+
+Interactive rebase (squash / reorder / edit history):
+
+```bash
+git rebase -i HEAD~3
+```
+
+```shell
+# Example: Squash multiple commits into a single commit
+
+# Initial state:
+(C1)-->(C2)-->(C3)-->(C4)-->(C5) <-- [HEAD, main]
+
+git log --oneline
+
+==
+34a1024 (HEAD -> main) Second feature
+d9d58ea Fix
+f41351f Undid previous fix
+0893e51 Yet another fix
+231b884 Another bugfix
+f08e0ce Bugfix
+b9c426f First feature
+==
+
+# Execute command from above
+
+git rebase -i HEAD~7
+
+==
+pick f08e0ce Bugfix
+pick 231b884 Another bugfix
+pick 0893e51 Yet another fix
+pick f41351f Undid previous fix
+pick d9d58ea Fix
+pick 34a1024 Second feature
+==
+
+# Alter to ('s' for squash)
+
+==
+pick b9c426f First feature
+s f08e0ce Bugfix
+s 231b884 Another bugfix
+s 0893e51 Yet another fix
+s f41351f Undid previous fix
+s d9d58ea Fix
+pick 34a1024 Second feature
+==
+
+# In the next window, alter the commit message to
+
+First feature
+
+# State after rebase:
+
+(C1)-->(C2) <-- [HEAD, main]
+
+git log --oneline
+
+34a1024 (HEAD -> main) Second feature
+d61937b First feature
 ```
 
 ---
