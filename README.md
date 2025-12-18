@@ -847,6 +847,12 @@ git push -u origin feature-x           # set upstream and push
 git push origin --delete branch-name   # delete remote branch
 ```
 
+Change upstream remote:
+
+```bash
+git branch --set-upstream-to=origin/another-branch
+```
+
 Prune / cleanup stale remote-tracking branches:
 
 ```bash
